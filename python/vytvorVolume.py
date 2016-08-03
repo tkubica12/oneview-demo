@@ -1,9 +1,13 @@
 #!/usr/bin/python
 
+# Script to demonstrate OneView Python interaction
+# Creating one or more volumes
+# Tomas Kubica
+
 import hpOneView as ov
-import sys
 import argparse
 
+# Let's just parse script inputs
 parser = argparse.ArgumentParser(description='Creating storage Volumes via OneView')
 parser.add_argument('--ov-server', help='OneView IP address',
     dest='oneview_server', default='192.168.89.100')
@@ -24,16 +28,24 @@ parser.add_argument('--volume-provisioning', help='Volume provisioning',
 
 args = parser.parse_args()
 
+# Get connection and log into OneView
 con = ov.connection(args.oneview_server)
 login = {'userName':args.oneview_user,'password':args.oneview_password}
 con.login(login)
 
+# Get access to storage resources
 storage = ov.storage(con)
 pools = storage.get_storage_pools()
 for pool in pools['members']:
+
+    # Find specified storage pool
     if pool['name'] == args.storage_pool:
         storagePoolUri = pool['uri']
+
+        # Loop throw volumes scpecified in input
         for vol in args.volumes:
+
+            # Create volumes
             print 'Adding volume: ', vol
             volume = ov.common.make_storage_volume(vol,
                                                  int(args.volume_size)*1024*1024*1024,
