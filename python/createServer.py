@@ -6,7 +6,7 @@
 
 import hpOneView as ov
 import argparse
-import hpOneView.profile as profile
+import json
 import sys
 
 # Let's just parse script inputs
@@ -17,18 +17,13 @@ parser.add_argument('--ov-user', help='OneView username',
     dest='oneview_user', default='Administrator')
 parser.add_argument('--ov-password', help='OneView password',
     dest='oneview_password', default='HPEnet123')
-parser.add_argument('--storage-pool', help='Storage pool name',
-    dest='storage_pool',default='CPG-SSD')
 parser.add_argument('--servers', help='Servers to be created',
     dest='servers', nargs='+', required=True)
 parser.add_argument('--hardware', help='Hardware type',
     dest='hardware', default='BL460c Gen9 1')
-parser.add_argument('--raid', dest='raid', required=False,
-                    choices=['NONE', 'RAID0', 'RAID1'],
-                    default='RAID1',
-                    help='Specify RAID level as NONE, RAID0 or RAID1')
-parser.add_argument('--drives', dest='drives',
-                    default='2', help='Number of RAID drives')
+parser.add_argument('--connection', help='Network profile',
+    dest='connection', required=True)
+
 
 args = parser.parse_args()
 
@@ -37,8 +32,9 @@ con = ov.connection(args.oneview_server)
 login = {'userName':args.oneview_user,'password':args.oneview_password}
 con.login(login)
 
-# Get access to compute resources
+# Get access to compute and network resources
 compute =  ov.servers(con)
+net = ov.networking(con)
 
 selectedServer = ''
 
@@ -60,20 +56,24 @@ for server in args.servers:
                    compute.get_server_by_name(selectedServer['serverHardwareName']),
                   'Off', force=True, blocking=True)
 
-    # Prepare local storage profile
-    localStorage = profile.make_local_storage_dict(
-                            con.get(selectedServer['serverHardwareTypeUri']),
-                            args.raid, True, True, 2)
-    print localStorage
-    sys.exit()
-
-
+    # Create connection  profile
+    networks = net.get_enet_networks()
+    netw = None
+    for network in networks:
+        if network['name'] == args.connection:
+            netw = network
+            break
+    connectionProfile = ov.common.make_ProfileConnectionV4(cid=1,
+                                                           name='My_connection',
+                                                           networkUri=netw['uri'],
+                                                           functionType='Ethernet',
+                                                           profileTemplateConnection=True)
 
     # Create server profile
     print 'Creating profile of server', server
     result = compute.create_server_profile(name=server,
                                   serverHardwareUri=selectedServer['serverHardwareUri'],
-                                  localStorageSettingsV3=localStorage)
+                                  profileConnectionV4=[connectionProfile])
 
     print 'Created profile %s on %s' % (server, selectedServer['serverHardwareName'])
 
