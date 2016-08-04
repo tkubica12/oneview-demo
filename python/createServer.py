@@ -6,8 +6,6 @@
 
 import hpOneView as ov
 import argparse
-import json
-import sys
 
 # Let's just parse script inputs
 parser = argparse.ArgumentParser(description='Creating servers OneView')
