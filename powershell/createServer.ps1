@@ -47,15 +47,10 @@ foreach ($Server in $Servers) {
   # Create logical disk
   $logicalDisk = New-HPOVServerProfileLogicalDisk -RAID $Raid -NumberofDrives $Drives -Name My_drive -Bootable $True
 
-  # bug workaround
-  $eg = Get-HPOVEnclosureGroup -Name ENCL-group
 
   # Create server profile
 
-  # bug workaround
+  $eg = Get-HPOVEnclosureGroup -Name ENCL-group
   New-HPOVServerProfile -Name $Server -Server $selectedServer -AssignmentType server -LocalStorage  -LogicalDisk $logicalDisk -Initialize -ManageBoot -Connections @($connectivity) -EnclosureGroup $eg -Verbose
-
-  # should be
-  New-HPOVServerProfile -Name $Server -Server $selectedServer -AssignmentType server -LocalStorage  -LogicalDisk $logicalDisk -Initialize -ManageBoot -Connections @($connectivity) -EnclosureGroup $selectedServer.serverGroupUri -Verbose
 
 }
