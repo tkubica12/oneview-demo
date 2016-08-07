@@ -5,6 +5,7 @@
 # Tomas Kubica
 
 import hpOneView as ov
+import hpOneView.profile as profile
 import argparse
 
 # Let's just parse script inputs
@@ -21,7 +22,11 @@ parser.add_argument('--hardware', help='Hardware type',
     dest='hardware', default='BL460c Gen9 1')
 parser.add_argument('--connection', help='Network profile',
     dest='connection', required=True)
-
+parser.add_argument('--raid', dest='raid', required=False,
+    choices=['NONE', 'RAID0', 'RAID1'],
+    help='Choose raid level on local storage')
+parser.add_argument('--drives', dest='drives', required=False,
+    help='Number of local storage disks')
 
 args = parser.parse_args()
 
@@ -67,11 +72,16 @@ for server in args.servers:
                                                            functionType='Ethernet',
                                                            profileTemplateConnection=True)
 
+    # Create local storage profile
+    storageProfile = profile.make_local_storage_dict(con.get(selectedServer['serverHardwareUri']),
+                                                     args.raid, True, True, args.drives)
+
     # Create server profile
     print 'Creating profile of server', server
     result = compute.create_server_profile(name=server,
                                   serverHardwareUri=selectedServer['serverHardwareUri'],
-                                  profileConnectionV4=[connectionProfile])
+                                  profileConnectionV4=[connectionProfile],
+                                  localStorageSettingsV3=storageProfile)
 
     print 'Created profile %s on %s' % (server, selectedServer['serverHardwareName'])
 
