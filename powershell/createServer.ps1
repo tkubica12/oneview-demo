@@ -51,6 +51,6 @@ foreach ($Server in $Servers) {
   # Create server profile
 
   $eg = Get-HPOVEnclosureGroup -Name ENCL-group
-  New-HPOVServerProfile -Name $Server -Server $selectedServer -AssignmentType server -LocalStorage  -LogicalDisk $logicalDisk -Initialize -ManageBoot -Connections @($connectivity) -EnclosureGroup $eg -Verbose
+  New-HPOVServerProfile -Name $Server -Server $selectedServer -AssignmentType server -LocalStorage  -LogicalDisk $logicalDisk -Initialize -ManageBoot -Connections @($connectivity) -EnclosureGroup $eg
 
 }
