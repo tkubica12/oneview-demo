@@ -8,7 +8,7 @@ param(
   [String] $Connection,
   [ValidateSet('NONE','RAID0','RAID1')]
   [String] $Raid,
-  [Int32] $Drives
+  [Int32] $Drives = 2
   )
 
 
@@ -42,15 +42,27 @@ foreach ($Server in $Servers) {
   }
 
   # Create connection  profile
-  $connectivity = Get-HPOVNetwork $Connection | New-HPOVServerProfileConnection -Name My_connection -ConnectionID 1
+  if ($Connection) {
+    $connectivity = Get-HPOVNetwork $Connection | New-HPOVServerProfileConnection -Name My_connection -ConnectionID 1
+    }
 
   # Create logical disk
-  $logicalDisk = New-HPOVServerProfileLogicalDisk -RAID $Raid -NumberofDrives $Drives -Name My_drive -Bootable $True
+  if ($Raid) {
+    $logicalDisk = New-HPOVServerProfileLogicalDisk -RAID $Raid -NumberofDrives $Drives -Name My_drive -Bootable $True
+    }
 
 
   # Create server profile
-
-  $eg = Get-HPOVEnclosureGroup -Name ENCL-group
-  New-HPOVServerProfile -Name $Server -Server $selectedServer -AssignmentType server -LocalStorage  -LogicalDisk $logicalDisk -Initialize -ManageBoot -Connections @($connectivity) -EnclosureGroup $eg
-
+  if ($Raid -And $Connection) {
+    New-HPOVServerProfile -Name $Server -Server $selectedServer -AssignmentType server -LocalStorage  -LogicalDisk $logicalDisk -Initialize -ManageBoot -Connections @($connectivity)
+    }
+  elseif ($Connection) {
+    New-HPOVServerProfile -Name $Server -Server $selectedServer -AssignmentType server -Connections @($connectivity)
+    }
+  elseif ($Raid) {
+    New-HPOVServerProfile -Name $Server -Server $selectedServer -AssignmentType server -LocalStorage  -LogicalDisk $logicalDisk -Initialize -ManageBoot
+    }
+  else {
+    New-HPOVServerProfile -Name $Server -Server $selectedServer -AssignmentType server
+  }
 }
