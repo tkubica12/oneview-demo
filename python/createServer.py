@@ -21,7 +21,7 @@ parser.add_argument('--servers', help='Servers to be created',
 parser.add_argument('--hardware', help='Hardware type',
     dest='hardware', default='BL460c Gen9 1')
 parser.add_argument('--connection', help='Network profile',
-    dest='connection', required=True)
+    dest='connection', required=False)
 parser.add_argument('--raid', dest='raid', required=False,
     choices=['NONE', 'RAID0', 'RAID1'],
     help='Choose raid level on local storage')
@@ -60,28 +60,46 @@ for server in args.servers:
                   'Off', force=True, blocking=True)
 
     # Create connection  profile
-    networks = net.get_enet_networks()
-    netw = None
-    for network in networks:
-        if network['name'] == args.connection:
-            netw = network
-            break
-    connectionProfile = ov.common.make_ProfileConnectionV4(cid=1,
-                                                           name='My_connection',
-                                                           networkUri=netw['uri'],
-                                                           functionType='Ethernet',
-                                                           profileTemplateConnection=True)
+    if args.connection:
+        networks = net.get_enet_networks()
+        netw = None
+        for network in networks:
+            if network['name'] == args.connection:
+                netw = network
+                break
+        connectionProfile = ov.common.make_ProfileConnectionV4(cid=1,
+                                                               name='My_connection',
+                                                               networkUri=netw['uri'],
+                                                               functionType='Ethernet',
+                                                               profileTemplateConnection=True)
 
     # Create local storage profile
-    storageProfile = profile.make_local_storage_dict(con.get(selectedServer['serverHardwareUri']),
-                                                     args.raid, True, True, args.drives)
+    if args.raid:
+        storageProfile = profile.make_local_storage_dict(sht=con.get(selectedServer['serverHardwareUri']),
+                                                         raidlevel=args.raid,
+                                                         lboot=False,
+                                                         init_storage=True,
+                                                         num=args.drives,
+                                                         drive_name='MyDrive')
 
     # Create server profile
     print 'Creating profile of server', server
-    result = compute.create_server_profile(name=server,
-                                  serverHardwareUri=selectedServer['serverHardwareUri'],
-                                  profileConnectionV4=[connectionProfile],
-                                  localStorageSettingsV3=storageProfile)
+    if (args.raid and args.connection):
+        result = compute.create_server_profile(name=server,
+                                      serverHardwareUri=selectedServer['serverHardwareUri'],
+                                      localStorageSettingsV3=storageProfile,
+                                      profileConnectionV4=[connectionProfile])
+    elif (args.raid):
+        result = compute.create_server_profile(name=server,
+                                      serverHardwareUri=selectedServer['serverHardwareUri'],
+                                      localStorageSettingsV3=storageProfile)
+    elif (args.connection):
+        result = compute.create_server_profile(name=server,
+                                      serverHardwareUri=selectedServer['serverHardwareUri'],
+                                      profileConnectionV4=[connectionProfile])
+    else:
+        result = compute.create_server_profile(name=server,
+                                      serverHardwareUri=selectedServer['serverHardwareUri'])
 
     print 'Created profile %s on %s' % (server, selectedServer['serverHardwareName'])
 
