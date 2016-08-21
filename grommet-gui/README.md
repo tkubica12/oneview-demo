@@ -4,7 +4,7 @@ This is simple demo application to demonstrate how Grommet can be used to create
 
 Docker image is available to make demo as easy as possible. On your Docker host run the following and use environmental variables to setup connectivity to your OneView appliance:
 
-docker run -e "OV_USERNAME=Administrator" -e "OV_PASSWORD=HPEnet123" -e "OV_SERVER=192.168.89.100" -e "OV_STORAGE_POOL=CPG-SSD" -d -p 81:80 -p 3000:3000 --name myapp tomaskubica/grommet-gui
+docker run -e "OV_USERNAME=Administrator" -e "OV_PASSWORD=HPEnet123" -e "OV_SERVER=192.168.89.100" -e "OV_STORAGE_POOL=CPG-SSD" -d -p 80:80 -p 3000:3000 --name myapp tomaskubica/grommet-gui
 
 If you have done any changes to source files and would like to build your own Docker image with that, use Dockerfile in project root folder to build it.
 
