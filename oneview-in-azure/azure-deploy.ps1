@@ -8,7 +8,7 @@ Add-AzureRmVhd -ResourceGroupName OneView -Destination "http://oneview.blob.core
 
 $singleSubnet = New-AzureRmVirtualNetworkSubnetConfig -Name ovsubnet -AddressPrefix "10.20.1.0/24"
 $vnet = New-AzureRmVirtualNetwork -Name ovnet -ResourceGroupName OneView -Location westeurope -AddressPrefix "10.20.1.0/24" -Subnet $singleSubnet
-$ovip = New-AzureRmPublicIpAddress -Name ovip -ResourceGroupName OneView -Location westeurope -AllocationMethod Dynamic
+$ovip = New-AzureRmPublicIpAddress -Name ovip -ResourceGroupName OneView -Location westeurope -AllocationMethod Dynamic -DomainNameLabel oneview
 $ovnic = New-AzureRmNetworkInterface -Name ovnic -ResourceGroupName OneView -Location westeurope -SubnetId $vnet.Subnets[0].Id -PublicIpAddressId $ovip.Id
 
 $password = ConvertTo-SecureString "HPEnet123" -AsPlainText -Force
@@ -22,3 +22,5 @@ $osDiskUri = '{0}vhds/ovvm-OneView2.vhd' -f $storageAcc.PrimaryEndpoints.Blob.To
 $vm = Set-AzureRmVMOSDisk -VM $vm -Name ovvm-OneView2.vhd -VhdUri $osDiskUri -CreateOption fromImage -SourceImageUri http://oneview.blob.core.windows.net/images/OneView2.vhd -Linux
 
 New-AzureRmVM -ResourceGroupName OneView -Location westeurope -VM $vm
+
+Write-Host "Connect with your browser to oneview.westeurope.cloudapp.azure.com"
