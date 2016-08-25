@@ -9,7 +9,9 @@ Currently this is work in progress, not all steps are implemented yet.
 Desired state is described in config.yaml. Currently there is only networking, but it is used to configure both Blade server interconnects and network profiles as well as HPE ToR switch. Content should be self explanatory and you can easily add more networks, ports etc.
 
 To run complete playbook use
-  ansible-playbook -i hosts main.yaml
+'''
+ansible-playbook -i hosts main.yaml
+'''
 
 OneView appliance connectivity details are in oneview-config.json.
 ToR switch IP address and credentials is in hosts file.
