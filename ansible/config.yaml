@@ -1,0 +1,24 @@
+vlans:
+  - id: 101
+    name: Prod-101
+  - id: 102
+    name: Prod-102
+  - id: 103
+    name: Dev-103
+interconnect_modules:
+  - module: Encl1, interconnect 1
+    ports:
+      - X2
+      - X4
+    switchports:
+      - GigabitEthernet 1/0/2
+      - GigabitEthernet 1/0/3
+    switch_link_aggregation_group: 1
+  - module: Encl1, interconnect 2
+    ports:
+      - X2
+      - X4
+    switchports:
+      - GigabitEthernet 1/0/4
+      - GigabitEthernet 1/0/5
+    switch_link_aggregation_group: 2

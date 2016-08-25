@@ -1,0 +1,68 @@
+- name: Ensure that Networks exist
+  oneview_ethernet_network:
+    config: "{{ oneview_config_file }}"
+    state: "{{ state }}"
+    data:
+      name: "{{ item.name }}"
+      vlanId: "{{ item.id }}"
+      smartLink: true
+      privateNetwork: false
+      purpose: General
+  with_items: "{{ vlans }}"
+  register: networks
+
+- name: Store network URIs in list
+  set_fact:
+    network_uris: "{{ networks.results | map(attribute='ansible_facts.ethernet_network.uri') | list }}"
+
+- name: Create map with facts about interconnects
+  oneview_interconnect_facts:
+    config: "{{ oneview_config_file }}"
+    name: "{{ item.module }}"
+  with_items: "{{ interconnect_modules }}"
+  register: interconnects_map
+
+- name: Build port configurations
+  set_fact:
+    port_config: '{
+      "desiredSpeed": "Auto",
+      "location": {
+          "locationEntries": [
+              {
+                  "type": "Port",
+                  "value": "{{ item[1] }}"
+              },
+              {{ item[0].ansible_facts.interconnects[0].interconnectLocation.locationEntries[0] }},
+              {{ item[0].ansible_facts.interconnects[0].interconnectLocation.locationEntries[1] }}
+          ]
+      },
+      "portUri": "{{ item[0].ansible_facts.interconnects[0].uri}}/ports/{{ item[0].ansible_facts.interconnects[0].uri.split("/")[3] }}"
+    }'
+  with_subelements:
+    - "{{ interconnects_map.results }}"
+    - "item.ports"
+  register: port_map
+
+- name: Map port configurations to JSON array
+  set_fact:
+    port_configs: "{{ port_map.results | map(attribute='ansible_facts.port_config') | list }}"
+
+- name: Get Logical Interconnect URI
+  set_fact:
+    l_interconnect: "{{ interconnects_map.results[0].ansible_facts.interconnects[0].logicalInterconnectUri }}"
+
+- name: Ensure that the Uplink Set with our Networks is present
+  oneview_uplink_set:
+    config: "{{ oneview_config_file }}"
+    state: "{{ state }}"
+    data:
+      name: 'My Uplink Set'
+      status: "OK"
+      logicalInterconnectUri: "{{ l_interconnect }}"
+      networkUris: "{{ network_uris }}"
+      fcNetworkUris: []
+      fcoeNetworkUris: []
+      portConfigInfos: "{{ port_configs }}"
+      connectionMode: "Auto"
+      networkType: "Ethernet"
+      manualLoginRedistributionState: "NotSupported"
