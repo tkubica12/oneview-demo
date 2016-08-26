@@ -83,21 +83,21 @@ export default class Dashboard extends Component {
   render () {
     return (
       <Section primary={true}>
-        <Heading tag="h2">Moje Synergy</Heading>
-        <Paragraph>Vytvoř si svůj disk</Paragraph>
+        <Heading tag="h2">Infrastructure as code</Heading>
+        <Paragraph>Create your Volume</Paragraph>
         <Form onSubmit={this.funkce}>
-          <FormField label="Název disku" htmlFor="volume_name">
+          <FormField label="Volume name" htmlFor="volume_name">
             <input id="volume_name" type="text" />
           </FormField>
           <Paragraph></Paragraph>
-          <Button label="Vytvoř" onClick={this.createVolume}/>
+          <Button label="Create" onClick={this.createVolume}/>
         </Form>
         <Paragraph></Paragraph>
         <Box separator="top">
           <Box direction="row" justify="between" pad={{"between": "small"}}>
-            <Paragraph>Naše storage obsahuje:</Paragraph>
+            <Paragraph>Volume count in storage:</Paragraph>
           </Box>
-          <Meter id="meter" type="circle" value={this.state.volumeCount} threshold={90} units="disků"/>
+          <Meter id="meter" type="circle" value={this.state.volumeCount} threshold={90} units="volumes"/>
         </Box>
       </Section>
     );
