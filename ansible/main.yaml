@@ -29,9 +29,6 @@
     vars:
       oneview_config_file: "oneview-config.json"
       state: present
-      oneview_host: 192.168.89.100
-      oneview_username: Administrator
-      oneview_password: HPEnet123
     vars_files:
       - config.yaml
     roles:

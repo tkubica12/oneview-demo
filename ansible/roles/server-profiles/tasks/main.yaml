@@ -4,11 +4,9 @@
 
 - name: Ensure server profiles are present
   oneview_server_profile:
-    # config: "{{ oneview_config_file }}"
-    oneview_host: "{{ oneview_host }}"
-    username: "{{ oneview_username }}"
-    password: "{{ oneview_password }}"
+    config: "{{ oneview_config_file }}"
     state: "{{ state }}"
-    server_template: "{{ item.profile }}"
-    name: "{{ item.name }}"
+    data:
+      server_template: "{{ item.profile }}"
+      name: "{{ item.name }}"
   with_items: "{{ servers }}"
