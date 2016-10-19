@@ -15,6 +15,12 @@ cd pyhpecw7
 sudo python setup.py install
 cd ..
 
+# install Python OneView library
+git clone https://github.com/HewlettPackard/python-hpOneView.git
+cd python-hpOneView
+pip install .
+cd ..
+
 # download Comware modules for Ansible
 git clone https://github.com/HPENetworking/ansible-hpe-cw7
 
